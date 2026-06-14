@@ -1,0 +1,1267 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Turma do Código v2</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --purple:#534AB7;--purple-light:#EEEDFE;--purple-mid:#CECBF6;
+  --teal:#1D9E75;--teal-light:#E1F5EE;--teal-mid:#9FE1CB;
+  --amber:#BA7517;--amber-light:#FAEEDA;--amber-mid:#FAC775;
+  --green:#3B6D11;--green-light:#EAF3DE;--green-mid:#C0DD97;
+  --red:#A32D2D;--red-light:#FCEBEB;--red-mid:#F7C1C1;
+  --bg:#f8f7ff;--border:#e0dff5;--text:#1a1a2e;--muted:#666;
+  --mono:'Courier New',monospace;
+}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.6}
+
+/* ── LOGIN ── */
+#login-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;background:var(--purple)}
+.login-card{background:#fff;border-radius:16px;padding:2.5rem;width:360px;text-align:center}
+.login-logo{font-size:48px;margin-bottom:.5rem}
+.login-card h1{font-size:22px;font-weight:700;color:var(--purple);margin-bottom:.25rem}
+.login-card p{font-size:13px;color:var(--muted);margin-bottom:1.5rem}
+.login-field{width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;margin-bottom:10px;outline:none}
+.login-field:focus{border-color:var(--purple)}
+.login-btn{width:100%;padding:11px;background:var(--purple);color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:8px}
+.login-btn:hover{background:#3C3489}
+.login-btn.secondary{background:#fff;color:var(--purple);border:1.5px solid var(--purple)}
+.login-btn.secondary:hover{background:var(--purple-light)}
+.login-error{font-size:12px;color:var(--red);margin-top:4px;display:none}
+
+/* ── APP LAYOUT ── */
+#app{display:none}
+.header{background:var(--purple);color:#fff;padding:.75rem 1.5rem;display:flex;align-items:center;gap:12px}
+.header h1{font-size:18px;font-weight:700}
+.header-sub{font-size:12px;opacity:.8}
+.header-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.stars-bar{background:rgba(255,255,255,.15);padding:5px 12px;border-radius:999px;font-size:13px;font-weight:700}
+.user-badge{background:rgba(255,255,255,.2);padding:5px 12px;border-radius:999px;font-size:13px;font-weight:600}
+.logout-btn{background:rgba(255,255,255,.15);border:none;color:#fff;padding:5px 10px;border-radius:6px;cursor:pointer;font-size:12px}
+.logout-btn:hover{background:rgba(255,255,255,.25)}
+
+/* ── MAIN ── */
+.main{display:grid;grid-template-columns:250px 1fr;min-height:calc(100vh - 56px)}
+.sidebar{background:#fff;border-right:1px solid var(--border);padding:1rem;overflow-y:auto}
+.lang-tabs{display:flex;gap:4px;margin-bottom:10px;flex-wrap:wrap}
+.lang-tab{flex:1;padding:6px;border-radius:8px;border:1.5px solid var(--border);background:transparent;cursor:pointer;font-size:12px;font-weight:600;color:var(--muted);min-width:56px}
+.lang-tab.act-cpp{background:var(--purple);color:#fff;border-color:var(--purple)}
+.lang-tab.act-cs{background:var(--teal);color:#fff;border-color:var(--teal)}
+.lang-tab.act-py{background:var(--amber);color:#fff;border-color:var(--amber)}
+.sidebar-title{font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px}
+.progress-bar{height:5px;background:var(--border);border-radius:999px;overflow:hidden;margin:8px 0 4px}
+.progress-fill{height:100%;background:var(--purple);border-radius:999px;transition:.4s}
+.prog-label{font-size:10px;color:var(--muted);margin-bottom:10px}
+.mission-item{display:flex;align-items:center;gap:7px;padding:7px 8px;border-radius:8px;cursor:pointer;margin-bottom:2px;border:1px solid transparent}
+.mission-item:hover{background:var(--purple-light)}
+.mission-item.active{background:var(--purple-light);border-color:var(--purple-mid)}
+.mission-item.done .m-icon{background:var(--green-mid);color:var(--green)}
+.mission-item.locked{opacity:.4;cursor:not-allowed}
+.m-icon{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;background:var(--purple-mid);color:var(--purple);flex-shrink:0;font-weight:700}
+.m-title{font-size:12px;font-weight:600;line-height:1.3}
+.m-sub{font-size:10px;color:var(--muted)}
+
+/* ── CONTENT ── */
+.content{padding:1.25rem;overflow-y:auto;max-height:calc(100vh - 56px)}
+.welcome{text-align:center;padding:2.5rem 1.5rem}
+.welcome-big{font-size:44px;margin-bottom:.75rem}
+.welcome h2{font-size:20px;font-weight:700;margin-bottom:.4rem}
+.welcome p{font-size:14px;color:var(--muted);max-width:360px;margin:0 auto 1.25rem}
+.start-btn{padding:10px 28px;background:var(--purple);color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer}
+
+/* ── MISSÃO ── */
+.mission-header{display:flex;align-items:center;gap:10px;margin-bottom:.75rem}
+.mission-emoji{font-size:28px}
+.mission-title-wrap h2{font-size:16px;font-weight:700}
+.mission-title-wrap p{font-size:12px;color:var(--muted)}
+.lang-badge{display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:999px;margin-left:5px}
+.badge-cpp{background:var(--purple-mid);color:#3C3489}
+.badge-cs{background:var(--teal-mid);color:#085041}
+.badge-py{background:var(--amber-mid);color:#633806}
+.analogy{background:var(--teal-light);border-radius:10px;padding:.6rem .9rem;margin-bottom:.75rem;font-size:13px;display:flex;gap:8px}
+.concept{background:var(--amber-light);border-left:4px solid var(--amber);border-radius:0 8px 8px 0;padding:.6rem .9rem;margin-bottom:.75rem;font-size:13px}
+.concept strong{color:var(--amber)}
+
+/* ── EDITOR ── */
+.editor-wrap{border:2px solid #313244;border-radius:10px;overflow:hidden;margin-bottom:.6rem}
+.editor-bar{display:flex;align-items:center;gap:7px;padding:6px 10px;background:#1e1e2e}
+.file-dot{width:9px;height:9px;border-radius:50%}
+.dot-r{background:#ff5f57}.dot-y{background:#febc2e}.dot-g{background:#28c840}
+.fname{font-family:var(--mono);font-size:11px;color:#cdd6f4;flex:1}
+.ebtn{padding:3px 10px;border-radius:5px;border:none;cursor:pointer;font-size:11px;font-weight:600}
+.ebtn-copy{background:#313244;color:#cdd6f4}.ebtn-copy:hover{background:#45475a}
+.ebtn-run{background:#a6e3a1;color:#1e1e2e}.ebtn-run:hover{background:#94e2d5}
+.ebtn-web{background:#cba6f7;color:#1e1e2e}.ebtn-web:hover{background:#b4befe}
+.code-area{width:100%;min-height:180px;background:#1e1e2e;color:#cdd6f4;font-family:var(--mono);font-size:12px;line-height:1.7;padding:12px;border:none;outline:none;resize:vertical;display:block;tab-size:2}
+.inputs-panel{background:var(--purple-light);border:1px solid var(--purple-mid);border-radius:8px;padding:.6rem .9rem;margin-bottom:.6rem;display:none}
+.inputs-panel.show{display:block}
+.inputs-title{font-size:11px;font-weight:700;color:var(--purple);margin-bottom:6px}
+.inp-row{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+.inp-row label{font-size:12px;min-width:100px}
+.inp-row input{flex:1;padding:4px 8px;border:1.5px solid var(--purple-mid);border-radius:6px;background:#fff;font-family:var(--mono);font-size:12px}
+.output-wrap{border:2px solid #313244;border-radius:10px;overflow:hidden;margin-bottom:.75rem}
+.output-bar{background:#181825;padding:5px 10px;display:flex;align-items:center;justify-content:space-between}
+.output-label{font-size:11px;color:#6c7086;display:flex;align-items:center;gap:5px}
+.out-dot{width:7px;height:7px;border-radius:50%;background:#a6e3a1}
+.output-body{background:#1e1e2e;color:#a6e3a1;font-family:var(--mono);font-size:12px;padding:12px;min-height:70px;white-space:pre-wrap;line-height:1.7}
+.output-body.err{color:#f38ba8}
+.output-body.wait{color:#6c7086;font-style:italic}
+
+/* ── QUIZ ── */
+.quiz-box{background:var(--purple-light);border:1.5px solid var(--purple-mid);border-radius:10px;padding:.75rem;margin-bottom:.75rem}
+.quiz-q{font-size:13px;font-weight:600;margin-bottom:8px}
+.quiz-opts{display:flex;flex-direction:column;gap:5px}
+.quiz-opt{padding:7px 12px;border-radius:7px;border:1.5px solid var(--purple-mid);background:#fff;cursor:pointer;font-size:12px;text-align:left}
+.quiz-opt:hover{background:var(--purple-mid)}
+.quiz-opt.correct{background:var(--green-light);border-color:var(--green-mid);color:var(--green)}
+.quiz-opt.wrong{background:var(--red-light);border-color:var(--red-mid);color:var(--red)}
+.quiz-feedback{margin-top:7px;font-size:12px;font-weight:600;padding:5px 9px;border-radius:6px;display:none}
+.quiz-feedback.ok{background:var(--green-light);color:var(--green)}
+.quiz-feedback.no{background:var(--red-light);color:var(--red)}
+
+/* ── CHALLENGE ── */
+.challenge-box{background:#fff;border:2px dashed var(--border);border-radius:10px;padding:.75rem;margin-bottom:.75rem}
+.challenge-title{font-size:13px;font-weight:700;color:var(--purple);margin-bottom:.4rem}
+.challenge-text{font-size:12px;margin-bottom:.6rem;line-height:1.6}
+.hint-btn{font-size:11px;color:var(--purple);background:var(--purple-light);border:1px solid var(--purple-mid);padding:3px 10px;border-radius:5px;cursor:pointer}
+.hint-text{display:none;margin-top:7px;font-size:11px;color:var(--muted);background:var(--amber-light);padding:5px 9px;border-radius:6px}
+.hint-text.show{display:block}
+
+/* ── PERGUNTAS DA MISSÃO ── */
+.qa-box{background:#fff;border:1.5px solid var(--border);border-radius:10px;padding:.75rem;margin-bottom:.75rem}
+.qa-title{font-size:13px;font-weight:700;color:var(--text);margin-bottom:.6rem;display:flex;align-items:center;gap:6px}
+.qa-list{display:flex;flex-direction:column;gap:8px;margin-bottom:.6rem;max-height:200px;overflow-y:auto}
+.qa-item{background:var(--bg);border-radius:8px;padding:7px 10px;font-size:12px}
+.qa-item .qa-who{font-weight:700;color:var(--purple);font-size:11px;margin-bottom:2px}
+.qa-item .qa-resp{background:var(--green-light);border-radius:6px;padding:5px 8px;margin-top:4px;font-size:11px;color:var(--green);display:none}
+.qa-item .qa-resp.show{display:block}
+.qa-item .qa-time{font-size:10px;color:var(--muted)}
+.qa-input-row{display:flex;gap:6px}
+.qa-input{flex:1;padding:6px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:12px;outline:none}
+.qa-input:focus{border-color:var(--purple)}
+.qa-send{padding:6px 14px;background:var(--purple);color:#fff;border:none;border-radius:7px;cursor:pointer;font-size:12px;font-weight:600}
+.qa-send:hover{background:#3C3489}
+.qa-empty{font-size:12px;color:var(--muted);text-align:center;padding:.5rem}
+
+/* ── ACHIEVEMENT ── */
+.ach-popup{display:none;background:var(--amber-light);border:2px solid var(--amber-mid);border-radius:10px;padding:.6rem .9rem;margin-bottom:.75rem;align-items:center;gap:10px}
+.ach-popup.show{display:flex}
+.ach-icon{font-size:24px}
+.ach-text strong{display:block;font-size:13px;color:var(--amber)}
+.ach-text span{font-size:11px;color:var(--muted)}
+
+/* ── SITES ── */
+.sites-section{margin-top:.4rem}
+.sites-title{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px}
+.sites-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.site-link{display:flex;align-items:center;gap:7px;padding:6px 10px;border:1.5px solid var(--border);border-radius:8px;text-decoration:none;background:#fff}
+.site-link:hover{border-color:var(--purple);background:var(--purple-light)}
+.site-icon{font-size:16px}
+.site-name{font-size:12px;font-weight:600;color:var(--text)}
+.site-tag{font-size:10px;color:var(--muted)}
+.next-btn{width:100%;padding:10px;background:var(--purple);color:#fff;border:none;border-radius:9px;font-size:14px;font-weight:700;cursor:pointer;margin-top:.4rem}
+.next-btn:disabled{background:var(--border);color:var(--muted);cursor:not-allowed}
+
+/* ── PAINEL PROFESSOR ── */
+#prof-panel{display:none;padding:1.25rem}
+.prof-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
+.prof-header h2{font-size:18px;font-weight:700}
+.prof-tabs{display:flex;gap:8px;margin-bottom:1rem}
+.prof-tab{padding:7px 18px;border-radius:8px;border:1.5px solid var(--border);background:#fff;cursor:pointer;font-size:13px;font-weight:600;color:var(--muted)}
+.prof-tab.active{background:var(--purple);color:#fff;border-color:var(--purple)}
+
+/* ranking */
+.rank-table{width:100%;border-collapse:collapse;background:#fff;border-radius:10px;overflow:hidden;border:1.5px solid var(--border)}
+.rank-table th{background:var(--purple);color:#fff;padding:9px 12px;text-align:left;font-size:12px;font-weight:600}
+.rank-table td{padding:9px 12px;font-size:13px;border-bottom:1px solid var(--border)}
+.rank-table tr:last-child td{border-bottom:none}
+.rank-table tr:hover td{background:var(--purple-light)}
+.rank-pos{font-weight:700;color:var(--purple);width:32px}
+.rank-medal{font-size:16px}
+.stat-pill{display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px}
+.pill-ok{background:var(--green-light);color:var(--green)}
+.pill-err{background:var(--red-light);color:var(--red)}
+.pill-pend{background:var(--amber-light);color:var(--amber)}
+
+/* progresso alunos */
+.student-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+.student-card{background:#fff;border:1.5px solid var(--border);border-radius:10px;padding:.9rem}
+.student-card-header{display:flex;align-items:center;gap:8px;margin-bottom:.6rem}
+.student-avatar{width:36px;height:36px;border-radius:50%;background:var(--purple-light);color:var(--purple);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.student-name{font-size:14px;font-weight:600}
+.student-stats{font-size:11px;color:var(--muted)}
+.mini-progress{height:4px;background:var(--border);border-radius:999px;overflow:hidden;margin:.4rem 0}
+.mini-progress-fill{height:100%;background:var(--purple);border-radius:999px}
+.mission-badges{display:flex;flex-wrap:wrap;gap:3px;margin-top:.4rem}
+.mbadge{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;border:1.5px solid transparent}
+.mbadge.done{background:var(--green-light);border-color:var(--green-mid);color:var(--green)}
+.mbadge.todo{background:var(--bg);border-color:var(--border);color:var(--muted)}
+
+/* perguntas painel */
+.qa-prof-list{display:flex;flex-direction:column;gap:8px}
+.qa-prof-item{background:#fff;border:1.5px solid var(--border);border-radius:10px;padding:.75rem}
+.qa-prof-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:.4rem}
+.qa-prof-who{font-size:12px;font-weight:700;color:var(--purple)}
+.qa-prof-mission{font-size:11px;color:var(--muted)}
+.qa-prof-text{font-size:13px;margin-bottom:.5rem}
+.qa-resp-area{width:100%;padding:6px 10px;border:1.5px solid var(--border);border-radius:6px;font-size:12px;resize:none;outline:none;margin-bottom:5px}
+.qa-resp-area:focus{border-color:var(--teal)}
+.qa-resp-btn{padding:5px 14px;background:var(--teal);color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600}
+.qa-resp-btn:hover{background:#0F6E56}
+.qa-prof-resp{background:var(--green-light);border-radius:6px;padding:5px 9px;font-size:12px;color:var(--green);margin-top:4px;display:none}
+.qa-prof-resp.show{display:block}
+.qa-badge-pend{font-size:10px;font-weight:700;padding:2px 7px;border-radius:999px;background:var(--amber-light);color:var(--amber)}
+.qa-badge-resp{font-size:10px;font-weight:700;padding:2px 7px;border-radius:999px;background:var(--green-light);color:var(--green)}
+.empty-state{text-align:center;padding:2rem;color:var(--muted);font-size:13px}
+.empty-state .empty-icon{font-size:36px;margin-bottom:.5rem}
+
+/* senha professor */
+.prof-lock{background:var(--amber-light);border:1.5px solid var(--amber-mid);border-radius:10px;padding:1rem;margin-bottom:1rem;display:flex;align-items:center;gap:10px}
+.prof-lock input{padding:7px 12px;border:1.5px solid var(--border);border-radius:7px;font-size:13px;outline:none}
+.prof-lock input:focus{border-color:var(--amber)}
+.prof-lock button{padding:7px 16px;background:var(--amber);color:#fff;border:none;border-radius:7px;cursor:pointer;font-size:13px;font-weight:600}
+.prof-lock-msg{font-size:12px;color:var(--red);margin-top:4px;display:none}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">🚀</div>
+    <h1>Turma do Código</h1>
+    <p>Entre com seu nome para começar!</p>
+    <input class="login-field" id="login-name" type="text" placeholder="Seu nome completo" maxlength="40">
+    <select class="login-field" id="login-lang" style="cursor:pointer">
+      <option value="cpp">C++</option>
+      <option value="cs">C#</option>
+      <option value="py">Python</option>
+    </select>
+    <button class="login-btn" onclick="doLogin()">Entrar como aluno</button>
+    <button class="login-btn secondary" onclick="showProfLogin()">Entrar como professor</button>
+    <div style="margin-top:10px;background:#f8f7ff;border-radius:8px;padding:8px 10px;display:none" id="prof-login-area">
+      <input class="login-field" id="prof-pwd" type="password" placeholder="Senha do professor">
+      <button class="login-btn" onclick="doProfLogin()">Acessar painel</button>
+    </div>
+    <div class="login-error" id="login-error"></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="header">
+    <span style="font-size:24px">🚀</span>
+    <div><h1>Turma do Código</h1><div class="header-sub">Aprenda C++, C# e Python</div></div>
+    <div class="header-right">
+      <div class="stars-bar">⭐ <span id="star-count">0</span></div>
+      <div class="user-badge" id="user-badge">Aluno</div>
+      <button class="logout-btn" onclick="doLogout()">Sair</button>
+    </div>
+  </div>
+
+  <div class="main" id="student-view">
+    <div class="sidebar">
+      <div class="lang-tabs">
+        <button class="lang-tab act-cpp" id="tab-cpp" onclick="switchLang('cpp')">C++</button>
+        <button class="lang-tab" id="tab-cs" onclick="switchLang('cs')">C#</button>
+        <button class="lang-tab" id="tab-py" onclick="switchLang('py')">Python</button>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
+      <div class="prog-label" id="prog-label">0 de 8 missões</div>
+      <div class="sidebar-title">Missões</div>
+      <div id="missions-list"></div>
+    </div>
+    <div class="content" id="content">
+      <div class="welcome">
+        <div class="welcome-big">🚀</div>
+        <h2>Bem-vindo à Turma do Código!</h2>
+        <p>Escolha C++, C# ou Python e comece sua primeira missão!</p>
+        <button class="start-btn" onclick="startFirst()">Começar agora!</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAINEL PROFESSOR -->
+  <div id="prof-panel">
+    <div class="prof-header">
+      <h2>🎓 Painel do Professor</h2>
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="font-size:12px;color:var(--muted)" id="prof-last-update"></div>
+        <button onclick="exportToExcel()" style="padding:7px 16px;background:var(--green);color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:700">📥 Exportar Excel</button>
+      </div>
+    </div>
+
+    <!-- senha -->
+    <div class="prof-lock" id="prof-lock">
+      <span style="font-size:20px">🔐</span>
+      <div>
+        <div style="font-size:13px;font-weight:600;margin-bottom:4px">Área protegida</div>
+        <div style="display:flex;gap:6px">
+          <input type="password" id="prof-pwd2" placeholder="Senha do professor">
+          <button onclick="unlockProf()">Entrar</button>
+        </div>
+        <div class="prof-lock-msg" id="prof-lock-msg">Senha incorreta!</div>
+      </div>
+    </div>
+
+    <div id="prof-content" style="display:none">
+      <div class="prof-tabs">
+        <button class="prof-tab active" onclick="showProfTab('ranking')">🏆 Ranking</button>
+        <button class="prof-tab" onclick="showProfTab('progresso')">📊 Progresso</button>
+        <button class="prof-tab" onclick="showProfTab('perguntas')">💬 Perguntas <span id="qa-badge" style="background:var(--red);color:#fff;border-radius:999px;padding:1px 6px;font-size:10px;margin-left:4px;display:none">0</span></button>
+      </div>
+      <div id="prof-tab-ranking"></div>
+      <div id="prof-tab-progresso" style="display:none"></div>
+      <div id="prof-tab-perguntas" style="display:none"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// STORAGE — usa localStorage como banco de dados compartilhado
+// Em produção use Supabase/Firebase. Aqui funciona no mesmo browser.
+// ═══════════════════════════════════════════════════════════
+var PROF_PWD = "prof123"; // MUDE AQUI a senha do professor
+
+function db_get(key){ try{ return JSON.parse(localStorage.getItem(key)); }catch(e){ return null; } }
+function db_set(key,val){ localStorage.setItem(key, JSON.stringify(val)); }
+
+function getAllStudents(){
+  var students = db_get("tc_students") || {};
+  return students;
+}
+function saveStudent(name, data){
+  var all = getAllStudents();
+  all[name] = data;
+  db_set("tc_students", all);
+}
+function getStudent(name){
+  var all = getAllStudents();
+  return all[name] || {name:name,stars:0,completed:[],errors:{},answers:{},questions:[]};
+}
+function getAllQuestions(){
+  var all = getAllStudents();
+  var qs = [];
+  Object.values(all).forEach(function(s){
+    (s.questions||[]).forEach(function(q){ qs.push(q); });
+  });
+  return qs.sort(function(a,b){ return b.time-a.time; });
+}
+
+// ═══════════════════════════════════════════════════════════
+// LIÇÕES
+// ═══════════════════════════════════════════════════════════
+var LESSONS = {};
+
+LESSONS.cpp = [
+  {id:"cpp1",emoji:"👋",title:"Olá, Mundo!",sub:"Seu primeiro programa",fname:"ola.cpp",
+   analogy:"É como dar uma ordem para um robô: Fale Olá! — o robô faz exatamente o que você manda!",
+   concept:"O <strong>cout</strong> manda o computador escrever na tela. O <strong>endl</strong> pula para a próxima linha. O <strong>#include</strong> importa ferramentas.",
+   code:'#include <iostream>\nusing namespace std;\n\nint main() {\n    cout << "Ola, mundo!" << endl;\n    cout << "Eu sei programar!" << endl;\n    return 0;\n}',
+   inputs:[],
+   sim:function(){ return "Ola, mundo!\nEu sei programar!"; },
+   quiz:{q:"O que o comando cout faz?",opts:["Apaga o programa","Escreve texto na tela","Faz uma conta","Para o computador"],answer:1,explain:'cout = "console output" — ele mostra texto na tela!'},
+   challenge:{text:"Mude o programa para mostrar o SEU nome e sua cidade!",hint:'Troque o texto dentro das aspas pelo seu nome.'}},
+
+  {id:"cpp2",emoji:"📦",title:"Variáveis são caixinhas!",sub:"Guardando informações",fname:"variaveis.cpp",
+   analogy:'Imagine uma caixinha escrita "NOME" — você coloca "Maria" dentro. Quando precisar, é só abrir!',
+   concept:"<strong>string</strong> guarda texto. <strong>int</strong> guarda inteiros. <strong>float</strong> guarda decimais. Crie assim: tipo nome = valor;",
+   code:'#include <iostream>\n#include <string>\nusing namespace std;\n\nint main() {\n    string nome = "Maria";\n    int idade = 10;\n    float nota = 9.5;\n\n    cout << "Nome: " << nome << endl;\n    cout << "Idade: " << idade << " anos" << endl;\n    cout << "Nota: " << nota << endl;\n    return 0;\n}',
+   inputs:[],
+   sim:function(){ return "Nome: Maria\nIdade: 10 anos\nNota: 9.5"; },
+   quiz:{q:"Qual tipo usamos para guardar texto em C++?",opts:["int","float","string","char"],answer:2,explain:"string guarda texto — palavras, frases, nomes!"},
+   challenge:{text:"Crie variáveis com SEU nome, SUA idade e SUA cor favorita!",hint:"Use string para nome e cor, int para idade."}},
+
+  {id:"cpp3",emoji:"⌨️",title:"O computador te ouve!",sub:"cin e cout",fname:"entrada.cpp",
+   analogy:"cin é como um microfone: o computador espera você falar (digitar) e guarda o que disse.",
+   concept:"<strong>cout</strong> mostra texto. <strong>cin</strong> recebe texto do teclado. Juntos, você conversa com o programa!",
+   code:'#include <iostream>\n#include <string>\nusing namespace std;\n\nint main() {\n    string nome;\n    int idade;\n    cout << "Qual e o seu nome? ";\n    cin >> nome;\n    cout << "Quantos anos? ";\n    cin >> idade;\n    cout << "Oi, " << nome << "!" << endl;\n    cout << "Daqui a 5 anos: " << idade+5 << " anos!" << endl;\n    return 0;\n}',
+   inputs:[{label:"Seu nome",id:"i1",def:"Turma"},{label:"Sua idade",id:"i2",def:"10"}],
+   sim:function(inp){ var n=inp[0]||"Turma",i=parseInt(inp[1])||10; return "Oi, "+n+"!\nDaqui a 5 anos: "+(i+5)+" anos!"; },
+   quiz:{q:"O que o cin faz?",opts:["Mostra texto","Faz cálculo","Recebe o que o usuário digita","Cria variável"],answer:2,explain:"cin captura o que o usuário escreve — é o programa ouvindo você!"},
+   challenge:{text:'Pergunte o animal favorito e diga "Que legal, voce ama [animal]!"',hint:"Use string animal; cin >> animal;"}},
+
+  {id:"cpp4",emoji:"🤔",title:"O programa decide!",sub:"if, else if, else",fname:"decisao.cpp",
+   analogy:"Uma bifurcação na estrada: SE (if) está chovendo, pego guarda-chuva; SENÃO (else), vou de chapéu.",
+   concept:"<strong>if</strong> verifica a condição. Se for verdade, executa. <strong>else</strong> executa quando é falsa. <strong>else if</strong> adiciona mais opções.",
+   code:'#include <iostream>\nusing namespace std;\n\nint main() {\n    int nota;\n    cout << "Qual foi sua nota? (0 a 10): ";\n    cin >> nota;\n    if (nota >= 7) {\n        cout << "Aprovado! Parabens!" << endl;\n    } else if (nota >= 5) {\n        cout << "Recuperacao. Estude mais!" << endl;\n    } else {\n        cout << "Nao desista! Tente de novo." << endl;\n    }\n    return 0;\n}',
+   inputs:[{label:"Sua nota (0-10)",id:"i1",def:"8"}],
+   sim:function(inp){ var n=parseInt(inp[0])||8; return n>=7?"Aprovado! Parabens!":n>=5?"Recuperacao. Estude mais!":"Nao desista! Tente de novo."; },
+   quiz:{q:"O que uso quando a condição é FALSA?",opts:["if","cout","else","int"],answer:2,explain:'else = "senão" — caminho quando a condição é falsa!'},
+   challenge:{text:"Pergunte a temperatura: abaixo de 15=frio, 15-25=agradável, acima de 25=calor!",hint:"Use if, else if e else com < e >."}},
+
+  {id:"cpp5",emoji:"🔁",title:"Repetindo sem cansar!",sub:"O laço for",fname:"repeticao.cpp",
+   analogy:'Professor: "Faça 10 flexões." Ele não fala 10 vezes — diz uma vez e você conta!',
+   concept:"<strong>for</strong> tem 3 partes: início (int i=1), condição (i&lt;=10) e incremento (i++). Repete enquanto a condição for verdadeira.",
+   code:'#include <iostream>\nusing namespace std;\n\nint main() {\n    cout << "Tabuada do 5:" << endl;\n    for (int i = 1; i <= 10; i++) {\n        cout << "5 x " << i << " = " << 5*i << endl;\n    }\n    return 0;\n}',
+   inputs:[],
+   sim:function(){ var s="Tabuada do 5:\n"; for(var i=1;i<=10;i++) s+="5 x "+i+" = "+(5*i)+"\n"; return s.trim(); },
+   quiz:{q:"O que i++ faz no for?",opts:["Para o loop","Soma 1 ao i","Subtrai 1 do i","Mostra i"],answer:1,explain:"i++ é atalho para i = i + 1. É como o loop conta!"},
+   challenge:{text:"Faça a tabuada do número que o usuário escolher!",hint:"Peça o número com cin e substitua o 5 no loop."}},
+
+  {id:"cpp6",emoji:"🎲",title:"Projeto: Calculadora!",sub:"switch/case",fname:"calculadora.cpp",
+   analogy:"Uma calculadora de verdade — mas você que programou. Você é o inventor!",
+   concept:"<strong>switch</strong> escolhe entre várias opções. Mais organizado que vários if/else quando há muitas escolhas.",
+   code:'#include <iostream>\nusing namespace std;\n\nint main() {\n    float a, b; char op;\n    cout << "Numero 1: "; cin >> a;\n    cout << "Operacao (+,-,*,/): "; cin >> op;\n    cout << "Numero 2: "; cin >> b;\n    float r = 0;\n    switch (op) {\n        case \'+\': r=a+b; break;\n        case \'-\': r=a-b; break;\n        case \'*\': r=a*b; break;\n        case \'/\': r=b!=0?a/b:0; break;\n        default: cout<<"Invalido!"<<endl; return 1;\n    }\n    cout << a<<" "<<op<<" "<<b<<" = "<<r << endl;\n    return 0;\n}',
+   inputs:[{label:"Número 1",id:"i1",def:"8"},{label:"Operação",id:"i2",def:"*"},{label:"Número 2",id:"i3",def:"4"}],
+   sim:function(inp){ var a=parseFloat(inp[0])||8,op=inp[1]||"*",b=parseFloat(inp[2])||4,r; if(op==="+")r=a+b; else if(op==="-")r=a-b; else if(op==="*")r=a*b; else if(op==="/"&&b!==0)r=a/b; else return "Invalido!"; return a+" "+op+" "+b+" = "+parseFloat(r.toFixed(4)); },
+   quiz:{q:"Para que serve o switch?",opts:["Criar loops","Escolher entre várias opções","Guardar listas","Criar funções"],answer:1,explain:"switch é ideal para muitas opções — mais limpo que vários else if!"},
+   challenge:{text:"Adicione a operação % (resto da divisão)!",hint:"case '%': r = (int)a % (int)b; break;"}},
+
+  {id:"cpp7",emoji:"📋",title:"Vetores: listas de coisas!",sub:"Arrays em C++",fname:"vetor.cpp",
+   analogy:"Uma régua com espaços numerados (0, 1, 2...). Cada espaço guarda um valor!",
+   concept:"<strong>string frutas[4]</strong> cria lista de 4 textos. <strong>frutas[0]</strong> é o primeiro. Contagem começa do zero!",
+   code:'#include <iostream>\nusing namespace std;\n\nint main() {\n    string frutas[4] = {"maca","banana","uva","laranja"};\n    cout << "Frutas favoritas:" << endl;\n    for (int i = 0; i < 4; i++) {\n        cout << i+1 << ". " << frutas[i] << endl;\n    }\n    return 0;\n}',
+   inputs:[],
+   sim:function(){ return "Frutas favoritas:\n1. maca\n2. banana\n3. uva\n4. laranja"; },
+   quiz:{q:"Qual é o índice do PRIMEIRO item de um vetor?",opts:["1","4","0","2"],answer:2,explain:"Em C++, a contagem começa do 0. Primeiro item é [0]!"},
+   challenge:{text:"Crie um vetor com os nomes de 3 colegas e mostre todos com for!",hint:'string colegas[3] = {"nome1","nome2","nome3"};'}},
+
+  {id:"cpp8",emoji:"🏆",title:"Funções: blocos mágicos!",sub:"Reutilizando código",fname:"funcao.cpp",
+   analogy:"É como uma receita de bolo: você escreve uma vez e pode fazer o bolo quantas vezes quiser!",
+   concept:"Você <strong>define</strong> a função com seu nome. Depois <strong>chama</strong> ela pelo nome. Reutilize sem repetir código!",
+   code:'#include <iostream>\nusing namespace std;\n\nvoid saudacao(string nome) {\n    cout << "Ola, " << nome << "!" << endl;\n    cout << "Bem-vindo a programacao!" << endl;\n    cout << "---" << endl;\n}\n\nint main() {\n    saudacao("Ana");\n    saudacao("Bruno");\n    saudacao("Carlos");\n    return 0;\n}',
+   inputs:[],
+   sim:function(){ return "Ola, Ana!\nBem-vindo a programacao!\n---\nOla, Bruno!\nBem-vindo a programacao!\n---\nOla, Carlos!\nBem-vindo a programacao!\n---"; },
+   quiz:{q:"Por que usamos funções?",opts:["Deixar o código lento","Escrever código repetido","Reutilizar código sem repetir","Apagar variáveis"],answer:2,explain:"Funções evitam repetição. Cria uma vez, usa quantas vezes quiser!"},
+   challenge:{text:'Crie uma função "despedida(string nome)" que diz "Tchau, [nome]!"',hint:"void despedida(string nome) { cout << ... }"}}
+];
+
+LESSONS.cs = [
+  {id:"cs1",emoji:"👋",title:"Olá, Mundo!",sub:"Seu primeiro programa",fname:"Program.cs",
+   analogy:'Console.WriteLine é como gritar para o computador: "Escreve isso aí!" — e ele obedece!',
+   concept:"<strong>Console.WriteLine()</strong> escreve uma linha na tela. Em C# moderno (.NET 6+), nem precisa de class ou Main!",
+   code:'Console.WriteLine("Ola, mundo!");\nConsole.WriteLine("Eu aprendo C# hoje!");\nConsole.WriteLine("Programar e demais!");',
+   inputs:[],
+   sim:function(){ return "Ola, mundo!\nEu aprendo C# hoje!\nProgramar e demais!"; },
+   quiz:{q:"Qual comando escreve na tela em C#?",opts:["cout","print","Console.WriteLine","echo"],answer:2,explain:'Console.WriteLine() — escrever uma linha no console!'},
+   challenge:{text:"Escreva 3 linhas sobre coisas que você gosta!",hint:'Use Console.WriteLine("...") três vezes.'}},
+  {id:"cs2",emoji:"📦",title:"Variáveis em C#",sub:"var e interpolação",fname:"variaveis.cs",
+   analogy:"Uma gaveta inteligente: você coloca qualquer coisa, e ela se organiza automaticamente!",
+   concept:"<strong>var</strong> deixa o C# descobrir o tipo! <strong>$\"texto {variavel}\"</strong> mistura texto com variável facilmente.",
+   code:'string nome = "Turma";\nint    idade = 10;\ndouble nota  = 9.5;\nvar    turma = "6A";\n\nConsole.WriteLine($"Aluno: {nome}");\nConsole.WriteLine($"Idade: {idade} anos");\nConsole.WriteLine($"Nota: {nota}");\nConsole.WriteLine($"Turma: {turma}");',
+   inputs:[],
+   sim:function(){ return "Aluno: Turma\nIdade: 10 anos\nNota: 9.5\nTurma: 6A"; },
+   quiz:{q:"O que o $ na frente da string faz?",opts:["Multiplica","Permite misturar texto e variáveis","Declara variável","Para o programa"],answer:1,explain:"$ cria string interpolada — coloque {variavel} dentro do texto!"},
+   challenge:{text:'Crie variáveis para seu jogo favorito e horas que joga por semana. Mostre com $"..."',hint:'var jogo = "Nome"; depois $"Jogo: {jogo}"'}},
+  {id:"cs3",emoji:"⌨️",title:"O programa te ouve!",sub:"Console.ReadLine",fname:"entrada.cs",
+   analogy:"ReadLine é uma caixa de perguntas: aparece na tela, você digita, o programa guarda.",
+   concept:"<strong>Console.ReadLine()</strong> recebe texto. Para número, use <strong>int.Parse()</strong> para converter.",
+   code:'Console.Write("Seu nome: ");\nstring nome = Console.ReadLine();\nConsole.Write("Sua idade: ");\nint idade = int.Parse(Console.ReadLine());\nConsole.WriteLine($"Oi, {nome}!");\nConsole.WriteLine($"Em 10 anos: {idade+10} anos!");',
+   inputs:[{label:"Seu nome",id:"i1",def:"Turma"},{label:"Sua idade",id:"i2",def:"10"}],
+   sim:function(inp){ var n=inp[0]||"Turma",i=parseInt(inp[1])||10; return "Oi, "+n+"!\nEm 10 anos: "+(i+10)+" anos!"; },
+   quiz:{q:"Para converter texto em número inteiro em C#:",opts:["string.Parse()","number()","int.Parse()","convert()"],answer:2,explain:"int.Parse() pega '10' e transforma em número 10!"},
+   challenge:{text:"Pergunte o animal favorito e quantas patas tem. Mostre com interpolação!",hint:"int.Parse(Console.ReadLine()) para o número."}},
+  {id:"cs4",emoji:"🤔",title:"O programa decide!",sub:"if, else, ternário",fname:"decisao.cs",
+   analogy:"Semáforo: SE verde, passa; SENÃO SE amarelo, devagar; SENÃO vermelho, pare!",
+   concept:"C# tem o ternário: <strong>condição ? valor_true : valor_false</strong>. Um if em uma linha!",
+   code:'Console.Write("Nota (0-10): ");\ndouble nota = double.Parse(Console.ReadLine());\nif (nota >= 7) Console.WriteLine("APROVADO!");\nelse if (nota >= 5) Console.WriteLine("Recuperacao!");\nelse Console.WriteLine("Reprovado!");\nstring msg = nota >= 7 ? "Otimo!" : "Pode melhorar!";\nConsole.WriteLine(msg);',
+   inputs:[{label:"Nota (0-10)",id:"i1",def:"8"}],
+   sim:function(inp){ var n=parseFloat(inp[0])||8; var r=n>=7?"APROVADO!":n>=5?"Recuperacao!":"Reprovado!"; return r+"\n"+(n>=7?"Otimo!":"Pode melhorar!"); },
+   quiz:{q:"O que é o operador ternário?",opts:["Loop que repete 3x","if e else em uma linha","Função com 3 parâmetros","Tipo de variável"],answer:1,explain:"O ternário ? : é um if condensado: condição ? isso : aquilo!"},
+   challenge:{text:"Pergunte a hora (0-23): 6-11=Bom dia, 12-17=Boa tarde, 18+=Boa noite",hint:"Use if, else if, else com os horários."}},
+  {id:"cs5",emoji:"🔁",title:"Repetindo com for e foreach",sub:"Loops em C#",fname:"loop.cs",
+   analogy:"for conta peças. foreach serve cada pessoa da mesa automaticamente, sem contar.",
+   concept:"<strong>for</strong> usa contador. <strong>foreach</strong> percorre cada item de uma coleção — mais simples!",
+   code:'for (int i = 5; i >= 1; i--) Console.Write(i+" ");\nConsole.WriteLine("BOOM!");\n\nstring[] planetas = {"Mercurio","Venus","Terra","Marte"};\nConsole.WriteLine("Planetas:");\nforeach (string p in planetas) Console.WriteLine("  -> "+p);',
+   inputs:[],
+   sim:function(){ return "5 4 3 2 1 BOOM!\nPlanetas:\n  -> Mercurio\n  -> Venus\n  -> Terra\n  -> Marte"; },
+   quiz:{q:"O foreach é útil para:",opts:["Contar de 1 a 10","Percorrer cada item de uma lista","Criar variáveis","Apagar dados"],answer:1,explain:"foreach percorre cada elemento automaticamente — sem contador!"},
+   challenge:{text:"Crie um array com os dias da semana e mostre numerado com foreach.",hint:"Use int cont=1; antes do foreach e cont++ dentro."}},
+  {id:"cs6",emoji:"📋",title:"List: lista dinâmica!",sub:"List em C#",fname:"lista.cs",
+   analogy:"Array = prateleira fixa. List = mochila infinita: você vai colocando e ela cresce!",
+   concept:"<strong>List&lt;string&gt;</strong> cresce dinamicamente. <strong>.Add()</strong> adiciona, <strong>.Remove()</strong> remove, <strong>.Count</strong> diz o tamanho.",
+   code:'var lista = new List<string>();\nlista.Add("Leite");\nlista.Add("Pao");\nlista.Add("Queijo");\nConsole.WriteLine($"Lista ({lista.Count} itens):");\nfor(int i=0;i<lista.Count;i++) Console.WriteLine($"  {i+1}. {lista[i]}");\nlista.Remove("Pao");\nConsole.WriteLine($"Apos remover Pao: {lista.Count} itens");',
+   inputs:[],
+   sim:function(){ return "Lista (3 itens):\n  1. Leite\n  2. Pao\n  3. Queijo\nApos remover Pao: 2 itens"; },
+   quiz:{q:"Qual método adiciona item à List?",opts:[".Insert()",".Add()",".Put()",".Push()"],answer:1,explain:".Add() adiciona ao final da lista. Simples!"},
+   challenge:{text:"Crie uma lista com 3 matérias, adicione uma, remova uma, mostre o resultado!",hint:"new List<string>(), .Add() e .Remove()"}},
+  {id:"cs7",emoji:"🎲",title:"Projeto: Calculadora!",sub:"switch em C#",fname:"calculadora.cs",
+   analogy:"Uma calculadora real — mas você que programou. Você é o inventor!",
+   concept:"switch organiza múltiplas opções. Cada case é uma escolha — limpo e organizado!",
+   code:'Console.Write("Numero 1: "); double a=double.Parse(Console.ReadLine());\nConsole.Write("Operacao: "); string op=Console.ReadLine();\nConsole.Write("Numero 2: "); double b=double.Parse(Console.ReadLine());\ndouble r=0;\nswitch(op){\n  case "+": r=a+b; break;\n  case "-": r=a-b; break;\n  case "*": r=a*b; break;\n  case "/": r=b!=0?a/b:0; break;\n  default: Console.WriteLine("Invalido!"); return;\n}\nConsole.WriteLine($"{a} {op} {b} = {r}");',
+   inputs:[{label:"Número 1",id:"i1",def:"12"},{label:"Operação",id:"i2",def:"*"},{label:"Número 2",id:"i3",def:"5"}],
+   sim:function(inp){ var a=parseFloat(inp[0])||12,op=inp[1]||"*",b=parseFloat(inp[2])||5,r; if(op==="+")r=a+b; else if(op==="-")r=a-b; else if(op==="*")r=a*b; else if(op==="/"&&b)r=a/b; else return "Invalido!"; return a+" "+op+" "+b+" = "+parseFloat(r.toFixed(4)); },
+   quiz:{q:"Para que serve o switch?",opts:["Criar loops","Escolher entre várias opções","Guardar listas","Criar funções"],answer:1,explain:"switch é ideal para muitas opções!"},
+   challenge:{text:"Adicione % (resto) e ^ (potência com Math.Pow)!",hint:'case "%": r = a % b; break;'}},
+  {id:"cs8",emoji:"🏆",title:"Métodos: blocos mágicos!",sub:"Funções em C#",fname:"metodos.cs",
+   analogy:"Salvar um combo de videogame: uma tecla executa uma sequência inteira!",
+   concept:"<strong>void</strong> não retorna. <strong>string/int/etc</strong> retorna um valor. <strong>return</strong> devolve o resultado.",
+   code:'static string Saudacao(string nome) { return $"Ola, {nome}!"; }\nstatic double Media(double a, double b) { return (a+b)/2; }\n\nConsole.WriteLine(Saudacao("Ana"));\nConsole.WriteLine(Saudacao("Beto"));\nConsole.WriteLine($"Media: {Media(8,6)}");',
+   inputs:[],
+   sim:function(){ return "Ola, Ana!\nOla, Beto!\nMedia: 7"; },
+   quiz:{q:"O que o return faz?",opts:["Para o programa","Repete o método","Devolve valor para quem chamou","Cria variável"],answer:2,explain:"return devolve o resultado para quem chamou o método!"},
+   challenge:{text:"Crie Dobro(int n) que retorna n*2. Chame com 3 números!",hint:"static int Dobro(int n) { return n*2; }"}}
+];
+
+LESSONS.py = [
+  {id:"py1",emoji:"👋",title:"Olá, Mundo!",sub:"Seu primeiro programa",fname:"ola.py",
+   analogy:'print() é como gritar "Ei, computador, fala isso!" — e ele fala na hora!',
+   concept:"<strong>print()</strong> mostra texto na tela. Em Python não precisa de ; ou {}. A indentação (espaços) organiza o código!",
+   code:'print("Ola, mundo!")\nprint("Eu estou aprendendo Python!")\nprint("Python e muito legal!")',
+   inputs:[],
+   sim:function(){ return "Ola, mundo!\nEu estou aprendendo Python!\nPython e muito legal!"; },
+   quiz:{q:"Como mostrar texto na tela em Python?",opts:["write()","cout","Console.WriteLine()","print()"],answer:3,explain:"print() — o comando mais famoso do Python!"},
+   challenge:{text:"Escreva 3 frases sobre você mesmo com print()!",hint:'print("Meu nome e ...") — uma linha para cada frase.'}},
+  {id:"py2",emoji:"📦",title:"Variáveis em Python",sub:"Simples e poderosas!",fname:"variaveis.py",
+   analogy:"Uma pasta mágica: você joga qualquer coisa dentro e ela se organiza!",
+   concept:"Só escreva <strong>nome = valor</strong> e pronto! Python descobre o tipo. Use <strong>f\"texto {variavel}\"</strong> para misturar!",
+   code:'nome  = "Turma"\nidade = 10\nnota  = 9.5\ngosta = True\n\nprint(f"Nome: {nome}")\nprint(f"Idade: {idade} anos")\nprint(f"Nota: {nota}")\nprint(f"Gosta de programar: {gosta}")',
+   inputs:[],
+   sim:function(){ return "Nome: Turma\nIdade: 10 anos\nNota: 9.5\nGosta de programar: True"; },
+   quiz:{q:"Como criar variável 'idade' com valor 10 em Python?",opts:["int idade=10","var idade=10","idade=10","idade:10"],answer:2,explain:"Em Python: nome = valor. Sem tipo, sem ponto-e-vírgula!"},
+   challenge:{text:"Crie variáveis com nome, cor favorita e comida favorita. Mostre com f-strings!",hint:'nome = "..." e print(f"Meu nome e {nome}")'}},
+  {id:"py3",emoji:"⌨️",title:"O programa te ouve!",sub:"input() em Python",fname:"entrada.py",
+   analogy:"input() é um walkie-talkie: o programa faz a pergunta e fica esperando sua resposta.",
+   concept:"<strong>input(\"pergunta\")</strong> espera o usuário digitar. Use <strong>int()</strong> ou <strong>float()</strong> para converter para número.",
+   code:'nome = input("Qual e o seu nome? ")\nidade = int(input("Quantos anos? "))\nprint(f"Oi, {nome}!")\nprint(f"Daqui a 10 anos: {idade+10} anos!")',
+   inputs:[{label:"Seu nome",id:"i1",def:"Turma"},{label:"Sua idade",id:"i2",def:"10"}],
+   sim:function(inp){ var n=inp[0]||"Turma",i=parseInt(inp[1])||10; return "Oi, "+n+"!\nDaqui a 10 anos: "+(i+10)+" anos!"; },
+   quiz:{q:"O que int(input()) faz?",opts:["Mostra número","Lê texto e converte para inteiro","Cria variável","Para o programa"],answer:1,explain:"input() lê texto e int() converte para número inteiro!"},
+   challenge:{text:"Pergunte o animal favorito e quantas patas. Calcule patas de 3 desses animais!",hint:"patas=int(input(...)) e depois print(patas*3)"}},
+  {id:"py4",emoji:"🤔",title:"O programa decide!",sub:"if, elif, else",fname:"decisao.py",
+   analogy:"Escolha de sorvete: SE gosta de chocolate, esse; SENÃO SE morango, aquele; SENÃO baunilha!",
+   concept:"<strong>if</strong> verifica. <strong>elif</strong> é senão-se. <strong>else</strong> é o caso contrário. Blocos separados por <strong>:</strong> e indentação.",
+   code:'nota = float(input("Nota (0-10): "))\nif nota >= 7:\n    print("Aprovado! Parabens!")\nelif nota >= 5:\n    print("Recuperacao. Voce consegue!")\nelse:\n    print("Reprovado. Nao desista!")\nsit = "Otimo!" if nota >= 7 else "Pode melhorar!"\nprint(sit)',
+   inputs:[{label:"Nota (0-10)",id:"i1",def:"8"}],
+   sim:function(inp){ var n=parseFloat(inp[0])||8; var r=n>=7?"Aprovado! Parabens!":n>=5?"Recuperacao. Voce consegue!":"Reprovado. Nao desista!"; return r+"\n"+(n>=7?"Otimo!":"Pode melhorar!"); },
+   quiz:{q:'Em Python, como escrevemos "else if"?',opts:["elseif","else if","elif","otherwise"],answer:2,explain:"Python usa elif — versão compacta de else if!"},
+   challenge:{text:"Pergunte a temperatura: <15=Frio!, 15-25=Agradavel!, >25=Calor!",hint:"Use if, elif e else com os valores."}},
+  {id:"py5",emoji:"🔁",title:"Repetindo com for!",sub:"range() em Python",fname:"loop.py",
+   analogy:"Máquina de carimbar: coloca 10 folhas, ela carimba todas sozinha!",
+   concept:"<strong>for i in range(1,11)</strong> conta de 1 a 10. <strong>range(n)</strong> gera de 0 a n-1. Use <strong>for item in lista</strong> para listas!",
+   code:'print("Tabuada do 7:")\nfor i in range(1, 11):\n    print(f"7 x {i} = {7*i}")\n\nprint("Contagem regressiva:")\nfor i in range(5, 0, -1):\n    print(i, end=" ")\nprint("BOOM!")',
+   inputs:[],
+   sim:function(){ var s="Tabuada do 7:\n"; for(var i=1;i<=10;i++) s+="7 x "+i+" = "+(7*i)+"\n"; s+="Contagem regressiva:\n5 4 3 2 1 BOOM!"; return s; },
+   quiz:{q:"O que range(1,6) gera?",opts:["1,2,3,4,5,6","0,1,2,3,4,5","1,2,3,4,5","2,3,4,5,6"],answer:2,explain:"range(1,6) gera de 1 até 5 — o último fica de fora!"},
+   challenge:{text:"Faça a tabuada do número que o usuário escolher!",hint:"num=int(input(...)) e for i in range(1,11): print(f'{num} x {i} = {num*i}')"}},
+  {id:"py6",emoji:"📋",title:"Listas em Python!",sub:"A coleção mágica",fname:"listas.py",
+   analogy:"Mochila com bolsos infinitos — você enfia coisas, tira coisas, tudo fácil!",
+   concept:"<strong>[item1,item2]</strong> cria lista. <strong>.append()</strong> adiciona. <strong>.remove()</strong> remove. <strong>len()</strong> diz o tamanho.",
+   code:'frutas = ["maca","banana","uva"]\nprint(f"Tenho {len(frutas)} frutas:")\nfor f in frutas:\n    print(f"  - {f}")\nfrutas.append("morango")\nprint(f"Adicionei morango! Agora: {len(frutas)} frutas")\nfrutas.remove("banana")\nprint(f"Removi banana. Restaram: {len(frutas)} frutas")',
+   inputs:[],
+   sim:function(){ return "Tenho 3 frutas:\n  - maca\n  - banana\n  - uva\nAdicionei morango! Agora: 4 frutas\nRemovi banana. Restaram: 3 frutas"; },
+   quiz:{q:"Como adicionar item ao final de uma lista em Python?",opts:[".add()",".push()",".append()",".insert()"],answer:2,explain:".append() adiciona ao final da lista!"},
+   challenge:{text:"Crie lista com 3 matérias, adicione uma, remova uma, mostre o resultado!",hint:'.append("...") e .remove("...")'}},
+  {id:"py7",emoji:"🎲",title:"Projeto: Adivinhe o número!",sub:"random e while",fname:"jogo.py",
+   analogy:"import random é como convidar um dado gigante pro programa. Você pede um número e ele joga!",
+   concept:"<strong>import random</strong> importa módulo. <strong>random.randint(1,10)</strong> gera número. <strong>while True</strong> repete até um break.",
+   code:'import random\nsecreto = random.randint(1,10)\ntentativas = 0\nprint("Adivinhe o numero de 1 a 10!")\nwhile True:\n    chute = int(input("Seu chute: "))\n    tentativas += 1\n    if chute < secreto: print("Muito baixo!")\n    elif chute > secreto: print("Muito alto!")\n    else:\n        print(f"ACERTOU em {tentativas} tentativas!")\n        break',
+   inputs:[{label:"Seu chute (1-10)",id:"i1",def:"5"}],
+   sim:function(inp){ var c=parseInt(inp[0])||5,s=7; if(c===s) return "Adivinhe o numero de 1 a 10!\nACERTOU em 1 tentativas!"; return "Adivinhe o numero de 1 a 10!\n"+(c<s?"Muito baixo!":"Muito alto!"); },
+   quiz:{q:"O que random.randint(1,10) faz?",opts:["Gera decimal","Gera inteiro entre 1 e 10","Embaralha lista","Cria 10 variáveis"],answer:1,explain:"randint(a,b) gera inteiro entre a e b, inclusive!"},
+   challenge:{text:"Mude para adivinhar entre 1 e 20 e limite a 5 tentativas!",hint:"randint(1,20) e maximo=5 que diminui a cada tentativa."}},
+  {id:"py8",emoji:"🏆",title:"Funções com def!",sub:"Blocos mágicos em Python",fname:"funcoes.py",
+   analogy:"def é criar sua própria palavra mágica. Uma vez definida, você fala e a mágica acontece!",
+   concept:"<strong>def nome(param):</strong> define a função. <strong>return</strong> devolve um valor. Python usa indentação, sem chaves!",
+   code:'def saudacao(nome):\n    return f"Ola, {nome}! Bem-vindo!"\n\ndef media(n1, n2, n3):\n    m = (n1+n2+n3)/3\n    return round(m, 1)\n\nprint(saudacao("Ana"))\nprint(saudacao("Bruno"))\nm = media(8, 6, 9)\nprint(f"Media: {m}")',
+   inputs:[],
+   sim:function(){ return "Ola, Ana! Bem-vindo!\nOla, Bruno! Bem-vindo!\nMedia: 7.7"; },
+   quiz:{q:"Qual palavra cria função em Python?",opts:["function","func","def","create"],answer:2,explain:"def vem de 'define' — você define a função!"},
+   challenge:{text:"Crie dobro(n) que retorna n*2, e eh_par(n) que retorna True se n for par!",hint:"def dobro(n): return n*2"}}
+];
+
+// ═══════════════════════════════════════════════════════════
+// ESTADO
+// ═══════════════════════════════════════════════════════════
+var currentUser = null;
+var currentLang = "cpp";
+var currentLesson = null;
+var quizDone = false;
+var isProfessor = false;
+
+// ═══════════════════════════════════════════════════════════
+// LOGIN
+// ═══════════════════════════════════════════════════════════
+function showProfLogin(){
+  var a = document.getElementById("prof-login-area");
+  a.style.display = a.style.display==="none"?"block":"none";
+}
+
+function doLogin(){
+  var name = document.getElementById("login-name").value.trim();
+  var lang = document.getElementById("login-lang").value;
+  if(!name){ showError("Digite seu nome!"); return; }
+  currentUser = name;
+  currentLang = lang;
+  isProfessor = false;
+  var data = getStudent(name);
+  if(!data.completed) data.completed = [];
+  saveStudent(name, data);
+  startApp();
+}
+
+function doProfLogin(){
+  var pwd = document.getElementById("prof-pwd").value;
+  if(pwd !== PROF_PWD){ showError("Senha incorreta!"); return; }
+  currentUser = "Professor";
+  isProfessor = true;
+  startApp();
+}
+
+function unlockProf(){
+  var pwd = document.getElementById("prof-pwd2").value;
+  var msg = document.getElementById("prof-lock-msg");
+  if(pwd !== PROF_PWD){ msg.style.display="block"; return; }
+  msg.style.display="none";
+  document.getElementById("prof-lock").style.display="none";
+  document.getElementById("prof-content").style.display="block";
+  renderProfTab("ranking");
+}
+
+function showError(msg){
+  var el = document.getElementById("login-error");
+  el.textContent = msg; el.style.display = "block";
+  setTimeout(function(){ el.style.display="none"; }, 3000);
+}
+
+function startApp(){
+  document.getElementById("login-screen").style.display = "none";
+  document.getElementById("app").style.display = "block";
+  document.getElementById("user-badge").textContent = currentUser;
+  if(isProfessor){
+    document.getElementById("student-view").style.display = "none";
+    document.getElementById("prof-panel").style.display = "block";
+    document.getElementById("stars-bar") && (document.querySelector(".stars-bar").style.display="none");
+    renderProfPanel();
+  } else {
+    document.getElementById("student-view").style.display = "grid";
+    document.getElementById("prof-panel").style.display = "none";
+    updateStars();
+    switchLang(currentLang);
+  }
+}
+
+function doLogout(){
+  currentUser = null; currentLesson = null; isProfessor = false;
+  document.getElementById("login-screen").style.display = "flex";
+  document.getElementById("app").style.display = "none";
+  document.getElementById("login-name").value = "";
+  document.getElementById("prof-pwd").value = "";
+  document.getElementById("prof-login-area").style.display = "none";
+}
+
+// ═══════════════════════════════════════════════════════════
+// NAVEGAÇÃO ALUNO
+// ═══════════════════════════════════════════════════════════
+function updateStars(){
+  var data = getStudent(currentUser);
+  document.getElementById("star-count").textContent = data.stars||0;
+}
+
+function switchLang(lang){
+  currentLang = lang;
+  ["cpp","cs","py"].forEach(function(l){
+    document.getElementById("tab-"+l).className="lang-tab"+(l===lang?" act-"+l:"");
+  });
+  renderSidebar(); showWelcome();
+}
+
+function renderSidebar(){
+  var lessons = LESSONS[currentLang];
+  var data = getStudent(currentUser);
+  var comp = data.completed||[];
+  var done = lessons.filter(function(l){ return comp.indexOf(l.id)>=0; }).length;
+  document.getElementById("prog-fill").style.width=(done/lessons.length*100)+"%";
+  document.getElementById("prog-label").textContent=done+" de "+lessons.length+" missões";
+  var list=document.getElementById("missions-list");
+  list.innerHTML="";
+  lessons.forEach(function(l,i){
+    var isDone=comp.indexOf(l.id)>=0;
+    var isLocked=i>0&&comp.indexOf(lessons[i-1].id)<0;
+    var isCurr=currentLesson&&currentLesson.id===l.id;
+    var div=document.createElement("div");
+    div.className="mission-item"+(isDone?" done":"")+(isLocked?" locked":"")+(isCurr?" active":"");
+    div.onclick=function(){ if(!isLocked) loadLesson(l); };
+    div.innerHTML='<div class="m-icon">'+(isDone?"✓":l.emoji)+'</div><div><div class="m-title">'+l.title+'</div><div class="m-sub">'+l.sub+'</div></div>';
+    list.appendChild(div);
+  });
+}
+
+function showWelcome(){
+  currentLesson=null;
+  document.getElementById("content").innerHTML='<div class="welcome"><div class="welcome-big">🚀</div><h2>Bem-vindo, '+currentUser+'!</h2><p>Escolha C++, C# ou Python e comece sua missão!</p><button class="start-btn" onclick="startFirst()">Começar!</button></div>';
+}
+
+function startFirst(){ loadLesson(LESSONS[currentLang][0]); }
+
+// ═══════════════════════════════════════════════════════════
+// CARREGAR MISSÃO
+// ═══════════════════════════════════════════════════════════
+function loadLesson(l){
+  currentLesson=l; quizDone=false; renderSidebar();
+  var badge=currentLang==="cs"?"badge-cs":currentLang==="py"?"badge-py":"badge-cpp";
+  var inputsHTML="";
+  if(l.inputs&&l.inputs.length){
+    inputsHTML='<div class="inputs-panel show"><div class="inputs-title">⌨️ Entradas simuladas</div>';
+    l.inputs.forEach(function(inp){ inputsHTML+='<div class="inp-row"><label>'+inp.label+':</label><input type="text" id="'+inp.id+'" value="'+inp.def+'"></div>'; });
+    inputsHTML+='</div>';
+  }
+  var qopts="";
+  l.quiz.opts.forEach(function(o,i){ qopts+='<button class="quiz-opt" onclick="answerQuiz('+i+')">'+o+'</button>'; });
+
+  // Perguntas existentes da missão
+  var qaHTML = renderQASection(l.id);
+
+  document.getElementById("content").innerHTML=
+    '<div class="mission-header"><span class="mission-emoji">'+l.emoji+'</span><div class="mission-title-wrap"><h2>'+l.title+' <span class="lang-badge '+badge+'">'+currentLang.toUpperCase()+'</span></h2><p>'+l.sub+'</p></div></div>'+
+    '<div class="analogy"><span style="font-size:18px">💡</span><span>'+l.analogy+'</span></div>'+
+    '<div class="concept"><strong>O que aprendemos:</strong> '+l.concept+'</div>'+
+    '<div class="editor-wrap"><div class="editor-bar"><div style="display:flex;gap:4px"><div class="file-dot dot-r"></div><div class="file-dot dot-y"></div><div class="file-dot dot-g"></div></div><span class="fname">'+l.fname+'</span><div style="display:flex;gap:5px"><button class="ebtn ebtn-copy" onclick="copyCode()">📋 Copiar</button><button class="ebtn ebtn-run" onclick="runCode()">▶ Executar</button><button class="ebtn ebtn-web" onclick="openOnline()">🌐 Online</button></div></div><textarea class="code-area" id="code-editor" spellcheck="false"></textarea></div>'+
+    inputsHTML+
+    '<div class="output-wrap"><div class="output-bar"><span class="output-label"><span class="out-dot"></span>Terminal</span><button class="ebtn ebtn-copy" onclick="clearOut()">🗑</button></div><div class="output-body wait" id="output">Pressione ▶ Executar...</div></div>'+
+    '<div class="quiz-box"><div class="quiz-q">🧠 '+l.quiz.q+'</div><div class="quiz-opts" id="quiz-opts">'+qopts+'</div><div class="quiz-feedback" id="quiz-fb"></div></div>'+
+    '<div class="challenge-box"><div class="challenge-title">⚡ Desafio extra</div><div class="challenge-text">'+l.challenge.text+'</div><button class="hint-btn" onclick="toggleHint()">💬 Mostrar dica</button><div class="hint-text" id="hint-text">👉 '+l.challenge.hint+'</div></div>'+
+    qaHTML+
+    '<div class="ach-popup" id="ach-popup"><span class="ach-icon">🏅</span><div class="ach-text"><strong id="ach-title">Conquista!</strong><span id="ach-sub"></span></div></div>'+
+    '<div class="sites-section"><div class="sites-title">Compiladores online (Chromebook)</div><div class="sites-grid"><a class="site-link" href="https://www.onlinegdb.com/online_c++_compiler" target="_blank"><span class="site-icon">🔧</span><div><div class="site-name">OnlineGDB</div><div class="site-tag">C++ e C#</div></div></a><a class="site-link" href="https://dotnetfiddle.net/" target="_blank"><span class="site-icon">🎻</span><div><div class="site-name">dotnetfiddle</div><div class="site-tag">C#</div></div></a><a class="site-link" href="https://replit.com/languages/python3" target="_blank"><span class="site-icon">🐍</span><div><div class="site-name">Replit</div><div class="site-tag">Python</div></div></a><a class="site-link" href="https://cpp.sh/" target="_blank"><span class="site-icon">⚡</span><div><div class="site-name">cpp.sh</div><div class="site-tag">C++</div></div></a></div></div>'+
+    '<button class="next-btn" id="next-btn" onclick="nextLesson()" disabled>Próxima missão ➡</button>';
+
+  document.getElementById("code-editor").value=l.code;
+
+  // verifica se já completou
+  var data=getStudent(currentUser);
+  if((data.completed||[]).indexOf(l.id)>=0){
+    document.getElementById("next-btn").disabled=false;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// PERGUNTAS DA MISSÃO (aluno)
+// ═══════════════════════════════════════════════════════════
+function renderQASection(lessonId){
+  var data = getStudent(currentUser);
+  var qs = (data.questions||[]).filter(function(q){ return q.lessonId===lessonId; });
+  var listHTML = "";
+  if(qs.length===0){
+    listHTML='<div class="qa-empty">Nenhuma pergunta ainda. Seja o primeiro a perguntar!</div>';
+  } else {
+    qs.forEach(function(q,i){
+      var respHTML = q.response ? '<div class="qa-resp show">👨‍🏫 Professor: '+q.response+'</div>' : '';
+      listHTML+='<div class="qa-item"><div class="qa-who">'+q.author+'</div><div>'+q.text+'</div>'+respHTML+'<div class="qa-time">'+formatTime(q.time)+'</div></div>';
+    });
+  }
+  // Perguntas de outros alunos também
+  var allStudents = getAllStudents();
+  var othersHTML = "";
+  Object.values(allStudents).forEach(function(s){
+    if(s.name===currentUser) return;
+    (s.questions||[]).filter(function(q){ return q.lessonId===lessonId; }).forEach(function(q){
+      var respHTML = q.response ? '<div class="qa-resp show">👨‍🏫 Professor: '+q.response+'</div>' : '';
+      othersHTML+='<div class="qa-item"><div class="qa-who">'+q.author+'</div><div>'+q.text+'</div>'+respHTML+'<div class="qa-time">'+formatTime(q.time)+'</div></div>';
+    });
+  });
+
+  return '<div class="qa-box"><div class="qa-title">💬 Perguntas desta missão</div>'+
+    '<div class="qa-list" id="qa-list">'+listHTML+othersHTML+'</div>'+
+    '<div class="qa-input-row"><input class="qa-input" id="qa-input" type="text" placeholder="Sua dúvida sobre esta missão..."><button class="qa-send" onclick="sendQuestion()">Enviar</button></div></div>';
+}
+
+function sendQuestion(){
+  var input = document.getElementById("qa-input");
+  var text = input.value.trim();
+  if(!text) return;
+  var data = getStudent(currentUser);
+  if(!data.questions) data.questions=[];
+  data.questions.push({
+    id: Date.now().toString(),
+    lessonId: currentLesson.id,
+    lessonTitle: currentLesson.title,
+    author: currentUser,
+    text: text,
+    time: Date.now(),
+    response: null
+  });
+  saveStudent(currentUser, data);
+  input.value="";
+  // Recarregar seção de QA
+  var qaBox = document.querySelector(".qa-box");
+  if(qaBox){ qaBox.outerHTML = renderQASection(currentLesson.id); }
+  // Rebind
+  setTimeout(function(){ var nb=document.querySelector(".qa-box"); if(nb){ nb.outerHTML=renderQASectionDOM(currentLesson.id); } },0);
+  reloadQABox();
+}
+
+function reloadQABox(){
+  var content = document.getElementById("content");
+  var qaBox = content.querySelector(".qa-box");
+  if(qaBox){
+    var tmp = document.createElement("div");
+    tmp.innerHTML = renderQASection(currentLesson.id);
+    qaBox.replaceWith(tmp.firstChild);
+  }
+}
+
+function formatTime(ts){
+  var d=new Date(ts);
+  return d.toLocaleDateString("pt-BR")+" "+d.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"});
+}
+
+// ═══════════════════════════════════════════════════════════
+// EXECUTAR CÓDIGO
+// ═══════════════════════════════════════════════════════════
+function runCode(){
+  if(!currentLesson) return;
+  var out=document.getElementById("output");
+  var inputs=(currentLesson.inputs||[]).map(function(inp){ var el=document.getElementById(inp.id); return el?el.value:inp.def; });
+  try{
+    if(currentLang==="py"){ runPython(inputs); }
+    else{ var r=currentLesson.sim(inputs); out.textContent=r; out.className="output-body"; }
+  }catch(e){ out.textContent="Erro: "+e.message; out.className="output-body err"; }
+}
+
+// ═══════════════════════════════════════════════════════════
+// INTERPRETADOR PYTHON
+// ═══════════════════════════════════════════════════════════
+function runPython(simInputs){
+  var out=document.getElementById("output");
+  var code=document.getElementById("code-editor").value;
+  out.textContent=""; out.className="output-body";
+  var inputIdx=0, output="", vars={};
+  function pyInput(p){ return inputIdx<simInputs.length?simInputs[inputIdx++]:""; }
+  function stripQ(s){ return s.trim().replace(/^["']|["']$/g,""); }
+  function pyStr(v){ if(v===true)return"True";if(v===false)return"False";if(v===null)return"None";if(Array.isArray(v))return"["+v.map(function(x){return typeof x==="string"?"'"+x+"'":pyStr(x);}).join(", ")+"]";return String(v); }
+  function getInd(line){var n=0;for(var i=0;i<line.length;i++){if(line[i]===" ")n++;else break;}return n;}
+  function evalFStr(s,sc){ return s.replace(/\{([^}]+)\}/g,function(_,e){var v=evalEx(e,sc);return v===undefined?"":pyStr(v);}); }
+  function evalEx(expr,lv){
+    expr=expr.trim(); var sc=Object.assign({},vars,lv||{});
+    var fDQ=expr.match(/^f"((?:[^"\\]|\\.)*)"$/); var fSQ=expr.match(/^f'((?:[^'\\]|\\.)*)'$/);
+    if(fDQ)return evalFStr(fDQ[1],sc); if(fSQ)return evalFStr(fSQ[1],sc);
+    var iIM=expr.match(/^int\s*\(\s*input\s*\(([^)]*)\)\s*\)$/); if(iIM){var v=pyInput(stripQ(iIM[1]));return isNaN(parseInt(v))?0:parseInt(v);}
+    var fIM=expr.match(/^float\s*\(\s*input\s*\(([^)]*)\)\s*\)$/); if(fIM){var v2=pyInput(stripQ(fIM[1]));return isNaN(parseFloat(v2))?0:parseFloat(v2);}
+    var inM=expr.match(/^input\s*\(([^)]*)\)$/); if(inM)return pyInput(stripQ(inM[1]));
+    expr=expr.replace(/round\s*\(([^,)]+),\s*(\d+)\)/g,function(_,x,n){try{return parseFloat(evalEx(x,sc)).toFixed(parseInt(n));}catch(e){return 0;}});
+    expr=expr.replace(/\bround\s*\(([^)]+)\)/g,function(_,x){try{return Math.round(parseFloat(evalEx(x,sc)));}catch(e){return 0;}});
+    expr=expr.replace(/\blen\s*\((\w+)\)/g,function(_,v){var a=sc[v];return Array.isArray(a)?a.length:0;});
+    expr=expr.replace(/random\.randint\s*\(([^,]+),([^)]+)\)/g,function(_,a,b){var lo=parseInt(evalEx(a,sc)),hi=parseInt(evalEx(b,sc));return Math.floor(Math.random()*(hi-lo+1))+lo;});
+    expr=expr.replace(/\b([a-zA-Z_]\w*)\s*\(([^)]*)\)/g,function(full,fn,as){if(fn in sc&&typeof sc[fn]==="function"){var args=as?as.split(",").map(function(a){return evalEx(a.trim(),sc);}):[];var r=sc[fn].apply(null,args);return r===undefined?"undefined":typeof r==="string"?JSON.stringify(r):r;}return full;});
+    expr=expr.replace(/\b([a-zA-Z_]\w*)\b/g,function(m){var skip=["True","False","None","and","or","not","in","if","else","elif","for","while","def","return","import","random","range","print","input","int","float","str","bool","len","round","append","remove","undefined","null","true","false"];if(skip.indexOf(m)>=0)return m;if(m in sc){var v=sc[m];if(typeof v==="string")return JSON.stringify(v);if(Array.isArray(v))return JSON.stringify(v);if(typeof v==="function")return m;return v;}return m;});
+    expr=expr.replace(/\bTrue\b/g,"true").replace(/\bFalse\b/g,"false").replace(/\bNone\b/g,"null");
+    expr=expr.replace(/\band\b/g,"&&").replace(/\bor\b/g,"||").replace(/\bnot\b/g,"!");
+    try{return Function('"use strict";return('+expr+')')();}catch(e){return undefined;}
+  }
+  function exWR(lines,si,bi,lv,onRet){
+    var i=si; var lc=Object.assign({},vars,lv);
+    while(i<lines.length){
+      var line=lines[i],str=line.trimLeft();
+      if(!str||str.charAt(0)==="#"){i++;continue;}
+      var ind=getInd(line); if(ind<bi)return i;
+      var rM=str.match(/^return\s+(.+)$/); if(rM){if(onRet)onRet(evalEx(rM[1],lc));return"return";}
+      if(str==="return"){if(onRet)onRet(undefined);return"return";}
+      var pm=str.match(/^print\s*\((.*)\)$/);
+      if(pm){var arg=pm[1].trim(),ec="\n";var em=arg.match(/,\s*end\s*=\s*["']([^"']*)["']\s*$/);if(em){ec=em[1];var ei=Math.max(arg.lastIndexOf(", end="),arg.lastIndexOf(",end="));arg=arg.slice(0,ei).trim();}var val=arg===""?"":evalEx(arg,lc);output+=(val===undefined?"":pyStr(val))+ec;i++;continue;}
+      var im=str.match(/^(if|elif)\s+(.+)\s*:$/),em2=str.match(/^else\s*:$/);
+      if(im||em2){var exec=false;while(i<lines.length){var s3=lines[i].trimLeft(),in3=getInd(lines[i]);if(in3<bi)break;var im3=s3.match(/^(if|elif)\s+(.+)\s*:$/),em3=s3.match(/^else\s*:$/);if(!im3&&!em3&&in3===bi&&lines[i]!==line)break;if((im3||em3)&&in3===bi){var bs=i+1,bii=bi+4,j=bs;while(j<lines.length&&(getInd(lines[j])>=bii||!lines[j].trim()))j++;if(!exec){var ok=em3?true:(evalEx(im3[2],lc)?true:false);if(ok){var rr=exWR(lines,bs,bii,lc,onRet);if(rr==="return")return"return";exec=true;}}i=j;}else i++;}continue;}
+      var aM=str.match(/^([a-zA-Z_]\w*)\s*([\+\-\*\/]?=)\s*(.+)$/);
+      if(aM){var vn=aM[1],op=aM[2],rhs=aM[3];var lm=rhs.trim().match(/^\[([^\]]*)\]$/);if(lm){var it=lm[1]?lm[1].split(",").map(function(a){return evalEx(a.trim(),lc);}):[];vars[vn]=it;lc[vn]=it;}else{var vv=evalEx(rhs,lc);if(op==="+=")vv=(vars[vn]||0)+vv;else if(op==="-=")vv=(vars[vn]||0)-vv;else if(op==="*=")vv=(vars[vn]||1)*vv;vars[vn]=vv;lc[vn]=vv;}i++;continue;}
+      i++;
+    }
+    return i;
+  }
+  function exL(lines,si,bi,lv){
+    var i=si; var lc=Object.assign({},vars,lv);
+    while(i<lines.length){
+      var line=lines[i],str=line.trimLeft();
+      if(!str||str.charAt(0)==="#"){i++;continue;}
+      var ind=getInd(line); if(ind<bi)return i;
+      if(/^import\s+/.test(str)){i++;continue;}
+      var pm=str.match(/^print\s*\((.*)\)$/);
+      if(pm){var arg=pm[1].trim(),ec="\n";var emE=arg.match(/,\s*end\s*=\s*["']([^"']*)["']\s*$/);if(emE){ec=emE[1];var ei=Math.max(arg.lastIndexOf(", end="),arg.lastIndexOf(",end="));arg=arg.slice(0,ei).trim();}var val=arg===""?"":evalEx(arg,lc);output+=(val===undefined?"":pyStr(val))+ec;i++;continue;}
+      var frM=str.match(/^for\s+(\w+)\s+in\s+range\s*\(([^)]+)\)\s*:$/);
+      if(frM){var vn=frM[1];var ra=frM[2].split(",").map(function(a){return parseInt(evalEx(a.trim(),lc))||0;});var rs=0,rsto=0,rst=1;if(ra.length===1)rsto=ra[0];else if(ra.length===2){rs=ra[0];rsto=ra[1];}else{rs=ra[0];rsto=ra[1];rst=ra[2];}var bS=i+1,bI=bi+4,j=bS;while(j<lines.length&&(getInd(lines[j])>=bI||!lines[j].trim()))j++;var cnt=0;for(var k=rs;rst>0?k<rsto:k>rsto;k+=rst){if(cnt++>500)break;lc[vn]=k;vars[vn]=k;exL(lines,bS,bI,Object.assign({},lc));}i=j;continue;}
+      var flM=str.match(/^for\s+(\w+)\s+in\s+(\w+)\s*:$/);
+      if(flM){var vn2=flM[1],ln=flM[2];var arr=lc[ln]||vars[ln]||[];var bS2=i+1,bI2=bi+4,j2=bS2;while(j2<lines.length&&(getInd(lines[j2])>=bI2||!lines[j2].trim()))j2++;if(Array.isArray(arr))arr.forEach(function(item){lc[vn2]=item;vars[vn2]=item;exL(lines,bS2,bI2,Object.assign({},lc));});i=j2;continue;}
+      var wM=str.match(/^while\s+(.+)\s*:$/);
+      if(wM){var cond=wM[1],bS3=i+1,bI3=bi+4,j3=bS3;while(j3<lines.length&&(getInd(lines[j3])>=bI3||!lines[j3].trim()))j3++;var wc=0;while(wc++<300){var cv=cond==="True"?true:evalEx(cond,lc);if(!cv)break;var wr=exL(lines,bS3,bI3,lc);if(wr==="break")break;}i=j3;continue;}
+      if(str==="break")return"break";
+      var ifM=str.match(/^(if|elif)\s+(.+)\s*:$/),elM=str.match(/^else\s*:$/);
+      if(ifM||elM){var chS=i,ex2=false;while(i<lines.length){var s2=lines[i].trimLeft(),id2=getInd(lines[i]);if(id2<bi)break;var iM2=s2.match(/^(if|elif)\s+(.+)\s*:$/),eM2=s2.match(/^else\s*:$/);if(!iM2&&!eM2&&id2===bi&&i>chS)break;if((iM2||eM2)&&id2===bi){var bS4=i+1,bI4=bi+4,j4=bS4;while(j4<lines.length&&(getInd(lines[j4])>=bI4||!lines[j4].trim()))j4++;if(!ex2){var ok2=eM2?true:(evalEx(iM2[2],lc)?true:false);if(ok2){exL(lines,bS4,bI4,lc);ex2=true;}}i=j4;}else i++;}continue;}
+      var dM=str.match(/^def\s+(\w+)\s*\(([^)]*)\)\s*:$/);
+      if(dM){var fn=dM[1],ps=dM[2];var params=ps?ps.split(",").map(function(p){return p.trim();}).filter(Boolean):[];var bS5=i+1,bI5=bi+4,j5=bS5;while(j5<lines.length&&(getInd(lines[j5])>=bI5||!lines[j5].trim()))j5++;var bL=lines.slice(bS5,j5);(function(fname,pars,bl){vars[fname]=function(){var args=Array.prototype.slice.call(arguments);var fv={};pars.forEach(function(p,pi){fv[p]=args[pi];});var snap=Object.assign({},vars);Object.assign(vars,fv);var rv=undefined;exWR(bl,0,4,fv,function(v){rv=v;});Object.assign(vars,snap);return rv;};})(fn,params,bL);i=j5;continue;}
+      var cM=str.match(/^(\w+)\s*\(([^)]*)\)$/);if(cM&&vars[cM[1]]&&typeof vars[cM[1]]==="function"){var ca=cM[2]?cM[2].split(",").map(function(a){return evalEx(a.trim(),lc);}):[];vars[cM[1]].apply(null,ca);i++;continue;}
+      var apM=str.match(/^(\w+)\.append\s*\((.+)\)$/);if(apM){var ap=vars[apM[1]];if(Array.isArray(ap))ap.push(evalEx(apM[2],lc));i++;continue;}
+      var rmM=str.match(/^(\w+)\.remove\s*\((.+)\)$/);if(rmM){var rm=vars[rmM[1]];if(Array.isArray(rm)){var rv2=evalEx(rmM[2],lc);var ri=rm.findIndex(function(x){return x==rv2;});if(ri>=0)rm.splice(ri,1);}i++;continue;}
+      var asM=str.match(/^([a-zA-Z_]\w*)\s*([\+\-\*\/]?=)\s*(.+)$/);
+      if(asM){var vn3=asM[1],op3=asM[2],rhs3=asM[3];var lm3=rhs3.trim().match(/^\[([^\]]*)\]$/);if(lm3){var it3=lm3[1]?lm3[1].split(",").map(function(a){return evalEx(a.trim(),lc);}):[];vars[vn3]=it3;lc[vn3]=it3;}else{var vv3=evalEx(rhs3,lc);if(op3==="+=")vv3=(vars[vn3]||0)+vv3;else if(op3==="-=")vv3=(vars[vn3]||0)-vv3;else if(op3==="*=")vv3=(vars[vn3]||1)*vv3;vars[vn3]=vv3;lc[vn3]=vv3;}i++;continue;}
+      i++;
+    }
+    return i;
+  }
+  try{ exL(code.split("\n"),0,0,{}); out.textContent=output||(output==="")&&output||"(sem saída)"; }
+  catch(e){ out.textContent="Erro: "+e.message; out.className="output-body err"; }
+}
+
+// ═══════════════════════════════════════════════════════════
+// QUIZ
+// ═══════════════════════════════════════════════════════════
+function answerQuiz(idx){
+  if(quizDone) return;
+  quizDone=true;
+  var opts=document.querySelectorAll(".quiz-opt");
+  var fb=document.getElementById("quiz-fb");
+  var correct=currentLesson.quiz.answer;
+  opts[correct].classList.add("correct");
+  if(idx!==correct) opts[idx].classList.add("wrong");
+  fb.style.display="block";
+
+  var data=getStudent(currentUser);
+  var lessonKey=currentLesson.id;
+
+  if(idx===correct){
+    fb.className="quiz-feedback ok";
+    fb.textContent="✅ Correto! "+currentLesson.quiz.explain;
+    if((data.completed||[]).indexOf(lessonKey)<0){
+      if(!data.completed)data.completed=[];
+      data.completed.push(lessonKey);
+      data.stars=(data.stars||0)+10;
+      if(!data.answers)data.answers={};
+      data.answers[lessonKey]={result:"correct",time:Date.now()};
+      saveStudent(currentUser,data);
+      updateStars(); renderSidebar();
+      setTimeout(showAch,400);
+    }
+    document.getElementById("next-btn").disabled=false;
+  } else {
+    fb.className="quiz-feedback no";
+    fb.textContent="❌ Não foi! "+currentLesson.quiz.explain;
+    if(!data.errors)data.errors={};
+    if(!data.errors[lessonKey])data.errors[lessonKey]=0;
+    data.errors[lessonKey]++;
+    if(!data.answers)data.answers={};
+    if(!data.answers[lessonKey]) data.answers[lessonKey]={result:"wrong",tries:1,time:Date.now()};
+    else data.answers[lessonKey].tries=(data.answers[lessonKey].tries||1)+1;
+    saveStudent(currentUser,data);
+  }
+}
+
+function showAch(){
+  var p=document.getElementById("ach-popup");
+  document.getElementById("ach-title").textContent="Missão concluída! +10 ⭐";
+  document.getElementById("ach-sub").textContent=currentLesson.title+" dominada!";
+  p.className="ach-popup show";
+  setTimeout(function(){p.className="ach-popup";},3500);
+}
+
+function nextLesson(){
+  var lessons=LESSONS[currentLang];
+  var idx=lessons.findIndex(function(l){return l.id===currentLesson.id;});
+  if(idx<lessons.length-1){ loadLesson(lessons[idx+1]); }
+  else{
+    var nl=currentLang==="cpp"?"cs":currentLang==="cs"?"py":"cpp";
+    var nLabel=nl==="cpp"?"C++":nl==="cs"?"C#":"Python";
+    document.getElementById("content").innerHTML='<div class="welcome"><div class="welcome-big">🏆</div><h2>Parabéns, '+currentUser+'!</h2><p>Você concluiu todas as missões de '+currentLang.toUpperCase()+'! Incrível!</p><button class="start-btn" onclick="switchLang(\''+nl+'\')">Tentar '+nLabel+'!</button></div>';
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// PAINEL PROFESSOR
+// ═══════════════════════════════════════════════════════════
+function renderProfPanel(){
+  document.getElementById("prof-last-update").textContent="Atualizado: "+new Date().toLocaleTimeString("pt-BR");
+  // contar perguntas pendentes
+  var qs=getAllQuestions();
+  var pend=qs.filter(function(q){return!q.response;}).length;
+  var badge=document.getElementById("qa-badge");
+  if(pend>0){ badge.textContent=pend; badge.style.display="inline"; }
+  else badge.style.display="none";
+}
+
+function showProfTab(tab){
+  document.querySelectorAll(".prof-tab").forEach(function(t){ t.classList.remove("active"); });
+  event.target.classList.add("active");
+  ["ranking","progresso","perguntas"].forEach(function(t){
+    document.getElementById("prof-tab-"+t).style.display=t===tab?"block":"none";
+  });
+  renderProfTab(tab);
+}
+
+function renderProfTab(tab){
+  if(tab==="ranking") renderRanking();
+  else if(tab==="progresso") renderProgresso();
+  else renderPerguntasProf();
+}
+
+function renderRanking(){
+  var students=getAllStudents();
+  var list=Object.values(students).sort(function(a,b){ return (b.stars||0)-(a.stars||0); });
+  if(list.length===0){ document.getElementById("prof-tab-ranking").innerHTML='<div class="empty-state"><div class="empty-icon">👥</div>Nenhum aluno cadastrado ainda.</div>'; return; }
+  var allLessons=[];
+  ["cpp","cs","py"].forEach(function(lang){ LESSONS[lang].forEach(function(l){ allLessons.push(l.id); }); });
+  var medals=["🥇","🥈","🥉"];
+  var rows="";
+  list.forEach(function(s,i){
+    var comp=(s.completed||[]).length;
+    var total=allLessons.length;
+    var erros=Object.values(s.errors||{}).reduce(function(a,b){return a+b;},0);
+    var acertos=comp;
+    var pct=total>0?Math.round(comp/total*100):0;
+    rows+='<tr><td class="rank-pos">'+(medals[i]||"#"+(i+1))+'</td>'+
+      '<td><strong>'+s.name+'</strong></td>'+
+      '<td>⭐ '+(s.stars||0)+'</td>'+
+      '<td><span class="stat-pill pill-ok">✓ '+acertos+'</span></td>'+
+      '<td><span class="stat-pill pill-err">✗ '+erros+'</span></td>'+
+      '<td>'+pct+'%</td>'+
+      '<td><div class="mini-progress" style="width:100px"><div class="mini-progress-fill" style="width:'+pct+'%"></div></div></td></tr>';
+  });
+  document.getElementById("prof-tab-ranking").innerHTML=
+    '<table class="rank-table">'+
+    '<thead><tr><th>#</th><th>Aluno</th><th>Estrelas</th><th>Acertos</th><th>Erros</th><th>Progresso</th><th></th></tr></thead>'+
+    '<tbody>'+rows+'</tbody></table>'+
+    '<div style="margin-top:10px;font-size:12px;color:var(--muted)">Total de missões: '+allLessons.length+' ('+LESSONS.cpp.length+' C++ + '+LESSONS.cs.length+' C# + '+LESSONS.py.length+' Python) &nbsp;|&nbsp; <button onclick="renderProfPanel();renderProfTab(\'ranking\')" style="font-size:11px;padding:2px 8px;cursor:pointer;border:1px solid var(--border);border-radius:5px;background:#fff">🔄 Atualizar</button></div>';
+}
+
+function renderProgresso(){
+  var students=getAllStudents();
+  var list=Object.values(students);
+  if(list.length===0){ document.getElementById("prof-tab-progresso").innerHTML='<div class="empty-state"><div class="empty-icon">📊</div>Nenhum aluno ainda.</div>'; return; }
+  var html='<div class="student-cards">';
+  list.forEach(function(s){
+    var comp=s.completed||[];
+    var totalAll=LESSONS.cpp.length+LESSONS.cs.length+LESSONS.py.length;
+    var pct=Math.round(comp.length/totalAll*100);
+    var ini=s.name.substring(0,2).toUpperCase();
+    // badges por linguagem
+    var badges="";
+    ["cpp","cs","py"].forEach(function(lang){
+      LESSONS[lang].forEach(function(l){
+        var done=comp.indexOf(l.id)>=0;
+        var errors=s.errors&&s.errors[l.id]?s.errors[l.id]:0;
+        var color=done?(errors>0?"background:#FAC775;border-color:#BA7517":""):"";
+        badges+='<div class="mbadge '+(done?"done":"todo")+'" title="'+l.title+(errors?" ("+errors+" erro(s))":"")+(done?" — concluída":"")+'" style="'+color+'">'+(done?"✓":l.emoji)+'</div>';
+      });
+    });
+    html+='<div class="student-card">'+
+      '<div class="student-card-header"><div class="student-avatar">'+ini+'</div><div><div class="student-name">'+s.name+'</div><div class="student-stats">'+comp.length+'/'+totalAll+' missões · '+( s.stars||0)+' ⭐</div></div></div>'+
+      '<div class="mini-progress"><div class="mini-progress-fill" style="width:'+pct+'%"></div></div>'+
+      '<div style="font-size:10px;color:var(--muted);margin-bottom:4px">'+pct+'% concluído</div>'+
+      '<div class="mission-badges">'+badges+'</div>'+
+      '</div>';
+  });
+  html+='</div><div style="margin-top:8px;font-size:11px;color:var(--muted)">🟡 = concluído com erros antes &nbsp; <button onclick="renderProfTab(\'progresso\')" style="font-size:11px;padding:2px 8px;cursor:pointer;border:1px solid var(--border);border-radius:5px;background:#fff">🔄 Atualizar</button></div>';
+  document.getElementById("prof-tab-progresso").innerHTML=html;
+}
+
+function renderPerguntasProf(){
+  var qs=getAllQuestions();
+  if(qs.length===0){ document.getElementById("prof-tab-perguntas").innerHTML='<div class="empty-state"><div class="empty-icon">💬</div>Nenhuma pergunta ainda.</div>'; return; }
+  var html='<div class="qa-prof-list">';
+  qs.forEach(function(q){
+    var haResp=!!q.response;
+    html+='<div class="qa-prof-item" id="qpi-'+q.id+'">'+
+      '<div class="qa-prof-header">'+
+      '<span class="qa-prof-who">'+q.author+'</span>'+
+      '<span class="qa-prof-mission">'+q.lessonTitle+' · '+formatTime(q.time)+'</span>'+
+      '<span class="'+(haResp?"qa-badge-resp":"qa-badge-pend")+'">'+(haResp?"✓ Respondida":"Pendente")+'</span>'+
+      '</div>'+
+      '<div class="qa-prof-text">'+q.text+'</div>'+
+      (haResp?
+        '<div class="qa-prof-resp show">'+q.response+'</div>':
+        '<textarea class="qa-resp-area" id="resp-'+q.id+'" rows="2" placeholder="Digite sua resposta..."></textarea>'+
+        '<button class="qa-resp-btn" onclick="sendProfResp(\''+q.author+'\',\''+q.id+'\')">Responder</button>'
+      )+
+      '</div>';
+  });
+  html+='</div>';
+  html+='<div style="margin-top:8px"><button onclick="renderProfTab(\'perguntas\')" style="font-size:11px;padding:3px 10px;cursor:pointer;border:1px solid var(--border);border-radius:5px;background:#fff">🔄 Atualizar</button></div>';
+  document.getElementById("prof-tab-perguntas").innerHTML=html;
+}
+
+function sendProfResp(studentName, questionId){
+  var textarea=document.getElementById("resp-"+questionId);
+  if(!textarea) return;
+  var resp=textarea.value.trim();
+  if(!resp) return;
+  var data=getStudent(studentName);
+  var qs=data.questions||[];
+  var q=qs.find(function(q){return q.id===questionId;});
+  if(q){ q.response=resp; q.responseTime=Date.now(); }
+  saveStudent(studentName,data);
+  renderPerguntasProf();
+  renderProfPanel();
+}
+
+// ═══════════════════════════════════════════════════════════
+// UTILITÁRIOS
+// ═══════════════════════════════════════════════════════════
+function toggleHint(){
+  var h=document.getElementById("hint-text");
+  h.className=h.className.indexOf("show")>=0?"hint-text":"hint-text show";
+}
+function copyCode(){
+  var c=document.getElementById("code-editor");
+  if(!c)return;
+  navigator.clipboard.writeText(c.value).then(function(){
+    var btn=event.target,orig=btn.textContent;
+    btn.textContent="✅ Copiado!";
+    setTimeout(function(){btn.textContent=orig;},1500);
+  });
+}
+function clearOut(){
+  var o=document.getElementById("output");
+  if(o){o.textContent="Pressione ▶ Executar...";o.className="output-body wait";}
+}
+function openOnline(){
+  var c=document.getElementById("code-editor");
+  var url=currentLang==="cs"?"https://dotnetfiddle.net/":currentLang==="py"?"https://replit.com/languages/python3":"https://www.onlinegdb.com/online_c++_compiler";
+  if(c){ navigator.clipboard.writeText(c.value).then(function(){ var btn=event.target,orig=btn.textContent;btn.textContent="📋 Copiado!";setTimeout(function(){btn.textContent=orig;window.open(url,"_blank");},700); }).catch(function(){window.open(url,"_blank");}); }
+  else window.open(url,"_blank");
+}
+
+
+// ═══════════════════════════════════════════════════════════
+// EXPORTAR EXCEL
+// ═══════════════════════════════════════════════════════════
+function exportToExcel(){
+  if(typeof XLSX==="undefined"){ alert("SheetJS não carregou. Verifique a conexão."); return; }
+  var wb2 = XLSX.utils.book_new();
+  var students = getAllStudents();
+  var list = Object.values(students).sort(function(a,b){ return (b.stars||0)-(a.stars||0); });
+  var allLessons = [];
+  ["cpp","cs","py"].forEach(function(lang){
+    LESSONS[lang].forEach(function(l){ allLessons.push({id:l.id,title:l.title,lang:lang.toUpperCase()}); });
+  });
+
+  // ── ABA 1: RANKING ──────────────────────────────────────
+  var rankRows = [["#","Aluno","Estrelas","Acertos","Erros","% Progresso","Missões Concluídas","Total Missões"]];
+  list.forEach(function(s,i){
+    var comp=(s.completed||[]).length;
+    var erros=Object.values(s.errors||{}).reduce(function(a,b){return a+b;},0);
+    rankRows.push([
+      i+1, s.name, s.stars||0, comp, erros,
+      allLessons.length>0?(comp/allLessons.length):0,
+      comp, allLessons.length
+    ]);
+  });
+  if(list.length===0) rankRows.push(["—","Nenhum aluno ainda","—","—","—","—","—","—"]);
+  var ws_rank = XLSX.utils.aoa_to_sheet(rankRows);
+  ws_rank["!cols"] = [{wch:4},{wch:22},{wch:10},{wch:10},{wch:8},{wch:13},{wch:18},{wch:15}];
+  // Formatar % como percentual
+  if(list.length>0){
+    for(var ri=1;ri<rankRows.length;ri++){
+      var cellRef = XLSX.utils.encode_cell({r:ri,c:5});
+      if(ws_rank[cellRef]){
+        ws_rank[cellRef].z = "0%";
+        ws_rank[cellRef].t = "n";
+      }
+    }
+  }
+  XLSX.utils.book_append_sheet(wb2, ws_rank, "Ranking");
+
+  // ── ABA 2: PROGRESSO POR MISSÃO ─────────────────────────
+  var progHeader = ["Aluno"];
+  allLessons.forEach(function(l){ progHeader.push(l.lang+" — "+l.title); });
+  progHeader.push("Total Concluídas");
+  var progRows = [progHeader];
+  list.forEach(function(s){
+    var comp=s.completed||[];
+    var row=[s.name];
+    allLessons.forEach(function(l){ row.push(comp.indexOf(l.id)>=0?"✓":"·"); });
+    row.push(comp.length+"/"+allLessons.length);
+    progRows.push(row);
+  });
+  if(list.length===0) progRows.push(["Nenhum aluno"]);
+  var ws_prog = XLSX.utils.aoa_to_sheet(progRows);
+  var progCols=[{wch:20}];
+  allLessons.forEach(function(){ progCols.push({wch:18}); });
+  progCols.push({wch:16});
+  ws_prog["!cols"]=progCols;
+  XLSX.utils.book_append_sheet(wb2, ws_prog, "Progresso");
+
+  // ── ABA 3: PERGUNTAS E RESPOSTAS ────────────────────────
+  var qaRows=[["Aluno","Missão","Pergunta","Status","Resposta do Professor","Data e Hora"]];
+  var allQs=getAllQuestions();
+  if(allQs.length===0){
+    qaRows.push(["Nenhuma pergunta ainda","","","","",""]);
+  } else {
+    allQs.forEach(function(q){
+      qaRows.push([
+        q.author, q.lessonTitle, q.text,
+        q.response?"Respondida":"Pendente",
+        q.response||"",
+        formatTime(q.time)
+      ]);
+    });
+  }
+  var ws_qa=XLSX.utils.aoa_to_sheet(qaRows);
+  ws_qa["!cols"]=[{wch:18},{wch:22},{wch:40},{wch:12},{wch:40},{wch:16}];
+  XLSX.utils.book_append_sheet(wb2, ws_qa, "Perguntas");
+
+  // ── ABA 4: ERROS POR MISSÃO ─────────────────────────────
+  var errRows=[["Missão","Linguagem","Total de Erros","Alunos com Dificuldade"]];
+  var errMap={};
+  var errStudMap={};
+  list.forEach(function(s){
+    Object.entries(s.errors||{}).forEach(function(kv){
+      var lid=kv[0], cnt=kv[1];
+      if(!errMap[lid]) errMap[lid]=0;
+      errMap[lid]+=cnt;
+      if(!errStudMap[lid]) errStudMap[lid]=[];
+      errStudMap[lid].push(s.name);
+    });
+  });
+  var errSorted=Object.entries(errMap).sort(function(a,b){return b[1]-a[1];});
+  if(errSorted.length===0){
+    errRows.push(["Nenhum erro registrado","","",""]);
+  } else {
+    errSorted.forEach(function(kv){
+      var lid=kv[0], cnt=kv[1];
+      var lesson=allLessons.find(function(l){return l.id===lid;});
+      errRows.push([
+        lesson?lesson.title:lid,
+        lesson?lesson.lang:"",
+        cnt,
+        (errStudMap[lid]||[]).join(", ")
+      ]);
+    });
+  }
+  var ws_err=XLSX.utils.aoa_to_sheet(errRows);
+  ws_err["!cols"]=[{wch:22},{wch:10},{wch:14},{wch:40}];
+  XLSX.utils.book_append_sheet(wb2, ws_err, "Erros por Missao");
+
+  // ── ABA 5: RESUMO GERAL ─────────────────────────────────
+  var totalComp=list.reduce(function(a,s){return a+(s.completed||[]).length;},0);
+  var totalErr=list.reduce(function(a,s){return a+Object.values(s.errors||{}).reduce(function(x,y){return x+y;},0);},0);
+  var totalQs=getAllQuestions().length;
+  var pendQs=getAllQuestions().filter(function(q){return!q.response;}).length;
+  var resumoRows=[
+    ["📊 RESUMO GERAL — Turma do Código",""],
+    ["Exportado em", new Date().toLocaleString("pt-BR")],
+    ["",""],
+    ["Total de alunos", list.length],
+    ["Total de missões disponíveis", allLessons.length],
+    ["Total de missões concluídas (soma)", totalComp],
+    ["Total de erros registrados", totalErr],
+    ["Taxa média de conclusão", list.length>0?(totalComp/(list.length*allLessons.length)):0],
+    ["",""],
+    ["Total de perguntas", totalQs],
+    ["Perguntas pendentes", pendQs],
+    ["Perguntas respondidas", totalQs-pendQs],
+    ["",""],
+    ["Linguagens disponíveis","C++, C# e Python"],
+    ["Missões C++", LESSONS.cpp.length],
+    ["Missões C#", LESSONS.cs.length],
+    ["Missões Python", LESSONS.py.length],
+  ];
+  var ws_res=XLSX.utils.aoa_to_sheet(resumoRows);
+  ws_res["!cols"]=[{wch:32},{wch:20}];
+  // Formatar taxa como %
+  var taxaCell=XLSX.utils.encode_cell({r:7,c:1});
+  if(ws_res[taxaCell]){ws_res[taxaCell].z="0.0%";ws_res[taxaCell].t="n";}
+  XLSX.utils.book_append_sheet(wb2, ws_res, "Resumo Geral");
+
+  // ── Download ─────────────────────────────────────────────
+  var date=new Date().toISOString().slice(0,10);
+  XLSX.writeFile(wb2, "TurmaDoCodigo_"+date+".xlsx");
+}
+// ═══════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════
+document.getElementById("login-name").addEventListener("keydown",function(e){ if(e.key==="Enter") doLogin(); });
+document.getElementById("prof-pwd").addEventListener("keydown",function(e){ if(e.key==="Enter") doProfLogin(); });
+</script>
+</body>
+</html>
